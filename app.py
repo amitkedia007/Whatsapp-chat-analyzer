@@ -76,4 +76,15 @@ if st.sidebar.button("Show Analysis"):
     fig, ax= plt.subplots()
     ax.imshow(df_wc)
     st.pyplot(fig)
+
+    # Most Common words
+    most_common_df = helper.most_common_words(selected_user, df)
+
+    fig, ax = plt.subplots()
+
+    ax.barh(most_common_df["Words"], most_common_df["Frequency"])
+    plt.xticks(rotation = 'vertical')
+    st.title("Most Common Words")
+    st.pyplot(fig)  
+
     
