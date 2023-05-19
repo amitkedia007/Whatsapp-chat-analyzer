@@ -1,0 +1,4 @@
+stremlit
+pandas
+urlextract
+matplotlib
