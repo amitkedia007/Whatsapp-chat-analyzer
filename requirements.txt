@@ -2,3 +2,4 @@ stremlit
 pandas
 urlextract
 matplotlib
+emoji

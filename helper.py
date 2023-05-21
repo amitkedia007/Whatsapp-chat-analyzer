@@ -2,6 +2,8 @@ from urlextract import URLExtract
 from wordcloud import WordCloud
 import pandas as pd
 from collections import Counter
+import emoji
+
 extract = URLExtract()
 
 def fetch_stats(selected_user, df):
@@ -41,10 +43,25 @@ def most_busy_user(df):
     return x, df_percent
 
 def create_wordcloud(selected_user, df):
+    f= open('stop_hinglish.txt', 'r')
+    stop_words = f.read()
+
     if selected_user != "Overall":
         df = df[df['user'] == selected_user]
     
+    temp = df[df['user'] != 'group_notification']
+    temp = temp[temp['message'] != '<Media omitted>\n']
+
+    def remove_stop_words(message):
+        y= []
+        for word in message.lower().split():
+            if word not in stop_words:
+                y.append(word)
+        return " ".join(y)
+    
+
     wc = WordCloud(width= 500, height= 500, min_font_size= 10, background_color='white')
+    temp["message"] = temp["message"]. apply(remove_stop_words)
     df_wc =wc.generate(df['message'].str.cat(sep=" "))
     return df_wc
 
@@ -70,3 +87,27 @@ def most_common_words(selected_user,df):
     most_common_df = pd.DataFrame(Counter(words).most_common(20)).rename(columns= {0: "Words", 1: "Frequency"})
     return most_common_df
 
+    # Emoji Analysis
+def emoji_helper(selected_user, df):
+    if selected_user != "Overall":
+        df = df[df['user'] == selected_user]
+
+    emojis = []
+    for message in df['message']:
+        emojis.extend([c for c in message if emoji.demojize(c) != c]) 
+
+    emoji_df = pd.DataFrame(Counter(emojis).most_common(len(Counter(emojis)))).rename(columns={0:"Emoji", 1:"Frequency"})
+    return emoji_df
+
+def monthly_timeline(selected_user, df):
+    if selected_user != "Overall":
+        df = df[df['user'] == selected_user]
+    
+    timeline = df.groupby(['year', 'month_num', 'month']).count()['message'].reset_index()
+    time = []
+    for i in range(timeline.shape[0]):
+        time.append(timeline['month'][i] + "-" + str(timeline['year'][i]))
+
+    timeline['time'] = time
+    return timeline
+   

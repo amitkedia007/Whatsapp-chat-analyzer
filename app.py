@@ -11,13 +11,8 @@ uploaded_file = st.sidebar.file_uploader("Choose a file")
 if uploaded_file is not None:
     bytes_data = uploaded_file.getvalue()
     mydata =bytes_data.decode("utf-8")
-    try:
-        df = preprocessor.preprocess(mydata)
+    df = preprocessor.preprocess(mydata)
 
-        st.dataframe(df)
-    except Exception as e:
-        st.write("An error occurred:",e)
-    
     #fetch unique users
     user_list = df['user'].unique().tolist()
     user_list.remove("group_notification")
@@ -27,7 +22,7 @@ if uploaded_file is not None:
     selected_user = st.sidebar.selectbox("Show Analysis with respect to", user_list)
 
 if st.sidebar.button("Show Analysis"):
-        
+    st.title("Top Statistics")    
     num_messages, words, num_media_msg, links = helper.fetch_stats(selected_user,df)
         
     col1, col2, col3, col4 = st.columns(4)
@@ -45,6 +40,14 @@ if st.sidebar.button("Show Analysis"):
         st.header("Links Shared")
         st.title(links)
         
+    # Timeline 
+
+    timeline =helper.monthly_timeline(selected_user,df)
+    fig, ax = plt.subplots()
+    ax.plot(timeline['time'], timeline['message'])
+    plt.xticks(rotation = 'vertical')
+    st.pyplot(fig)
+
 # finding the busiest users in the group(Group Level)
 
     if selected_user == 'Overall':
@@ -87,4 +90,18 @@ if st.sidebar.button("Show Analysis"):
     st.title("Most Common Words")
     st.pyplot(fig)  
 
-    
+    # Emoji Analysis
+
+    emoji_df = helper.emoji_helper(selected_user,df)
+    st.title("Emoji Analysis")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.dataframe(emoji_df)
+    with col2:
+        fig,ax = plt.subplots()
+
+        ax.pie(emoji_df["Frequency"].head(),labels=emoji_df["Emoji"].head(),autopct="%0.2f" )
+        st.pyplot(fig)
+
