@@ -3,3 +3,4 @@ pandas
 urlextract
 matplotlib
 emoji
+seaborn

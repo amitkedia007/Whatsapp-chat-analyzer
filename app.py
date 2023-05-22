@@ -3,6 +3,8 @@ import preprocessor, helper
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import numpy as np
+import seaborn as sns
+
 
 st.sidebar.title("Social Media Chat Analyzer")
 
@@ -27,7 +29,7 @@ if st.sidebar.button("Show Analysis"):
         
     col1, col2, col3, col4 = st.columns(4)
 
-    with col1:
+    with col1:  
         st.header("Total Messages")
         st.title(num_messages)
     with col2:
@@ -40,13 +42,57 @@ if st.sidebar.button("Show Analysis"):
         st.header("Links Shared")
         st.title(links)
         
-    # Timeline 
+    # Monthly Timeline 
+    
+    st.title("Monthly Activity Timeline")
+    timeline = helper.monthly_timeline(selected_user, df)
+    fig, ax = plt.subplots(figsize=(10,6))
 
-    timeline =helper.monthly_timeline(selected_user,df)
-    fig, ax = plt.subplots()
-    ax.plot(timeline['time'], timeline['message'])
-    plt.xticks(rotation = 'vertical')
+    # Using a bright color palette
+    palette = sns.color_palette("hsv", 1)
+
+    sns.lineplot(x='time', y='message', data=timeline, palette=palette, linewidth=2.5)
+
+    plt.xticks(rotation='vertical')
+    plt.xlabel('Time', fontsize=15)
+    plt.ylabel('Message', fontsize=15)
+
     st.pyplot(fig)
+
+    #Daily Timeline
+    st.title("Daily Activity Timeline")
+    d_timeline = helper.daily_timeline(selected_user, df)
+    fig, ax = plt.subplots(figsize=(10,6))
+
+    # Using a bright color palette
+    palette = sns.color_palette("hsv", 1)
+
+    sns.lineplot(x='only_date', y='message', data=d_timeline, palette=palette, linewidth=2.5)
+
+    plt.xticks(rotation='vertical')
+    plt.xlabel('Time', fontsize=15)
+    plt.ylabel('Message', fontsize=15)
+    st.pyplot(fig)
+
+    #  Activity Map 
+    st.title("Activity Map")
+    col1,col2 = st.columns(2)
+    
+    with col1: 
+        st.header("Most Busy Day")
+        busy_day = helper.week_activity_map(selected_user, df)
+        fig, ax = plt.subplots()
+        ax.bar(busy_day.index, busy_day.values)
+        plt.xticks(rotation = 'vertical')
+        st.pyplot(fig)
+    
+    with col2:
+        st.header("Most Busy Month")
+        busy_month = helper.month_activity_map(selected_user,df)
+        fig,ax = plt.subplots()
+        ax.bar(busy_month.index, busy_month.values)
+        plt.xticks(rotation = 'vertical')
+        st.pyplot(fig)
 
 # finding the busiest users in the group(Group Level)
 
