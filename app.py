@@ -118,6 +118,18 @@ if st.sidebar.button("Show Analysis"):
         with col2:
             st.write('## User Activity Data')  # Add a title to the DataFrame
             st.dataframe(new_df.style.highlight_max(color='lightgreen'))  # Highlight max values
+        
+        #Weekly Activity Heatmap
+        st.title("Weekly Activity Map")
+        user_heatmap = helper.activity_heatmap(selected_user, df)
+        fig, ax = plt.subplots()
+
+        sns.heatmap(user_heatmap, cmap='viridis', linewidths=0.001, linecolor='white', cbar_kws={'label': 'Activity Level'}, ax=ax)
+        plt.xlabel('Hour of the Day', fontsize=10)
+        plt.ylabel('Day of the Week', fontsize=10)
+
+        st.pyplot(fig)
+
 
     # WordCloud
     st.title("Word Cloud for Frequent Words")
