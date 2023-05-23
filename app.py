@@ -204,4 +204,4 @@ if st.sidebar.button("Show Analysis"):
     # Display the sentiment score
     sentiment = helper.sentiment_score(user_sentiments, selected_user)
     st.subheader(f"The sentiment of {selected_user} is {sentiment}")
-    
+        
