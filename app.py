@@ -163,3 +163,45 @@ if st.sidebar.button("Show Analysis"):
         ax.pie(emoji_df["Frequency"].head(),labels=emoji_df["Emoji"].head(),autopct="%0.2f" )
         st.pyplot(fig)
 
+    # User Sentiment Analysis
+    st.title("Sentiment Analysis")
+
+    # Perform sentiment analysis for the selected user or overall
+    user_sentiments = helper.analyze_sentiment(selected_user, df)
+
+    # If the selected user is 'Overall', display sentiment for all users
+    if selected_user == 'Overall':
+        overall_sentiment = {key: sum([user[key] for user in user_sentiments.values()])/len(user_sentiments) for key in ['pos', 'neu', 'neg', 'compound']}
+        st.subheader("Overall")
+
+        # Create a horizontal bar chart for the overall sentiment scores
+        fig, ax = plt.subplots()
+        ax.barh(list(overall_sentiment.keys()), list(overall_sentiment.values()), color=['green' if v >= 0 else 'red' for v in overall_sentiment.values()])
+        ax.set_xlabel('Score')
+        ax.set_title('Overall sentiment scores')
+        st.pyplot(fig)
+    else:
+        # If the selected user exists in the sentiment analysis results
+        if selected_user in user_sentiments:
+            sentiment_scores = user_sentiments[selected_user]
+
+            st.subheader(f"User: {selected_user}")
+
+            # Create a horizontal bar chart for the sentiment scores
+            fig, ax = plt.subplots()
+            ax.barh(list(sentiment_scores.keys()), list(sentiment_scores.values()), color=['green' if v >= 0 else 'red' for v in sentiment_scores.values()])
+            ax.set_xlabel('Score')
+            ax.set_title(f'Sentiment scores for {selected_user}')
+            st.pyplot(fig)
+        else:
+            st.write(f"No sentiment analysis results for {selected_user}")
+
+    ## Final results for the sentiment analysis
+
+    # Perform sentiment analysis for the selected user or overall
+    user_sentiments = helper.analyze_sentiment(selected_user, df)
+
+    # Display the sentiment score
+    sentiment = helper.sentiment_score(user_sentiments, selected_user)
+    st.subheader(f"The sentiment of {selected_user} is {sentiment}")
+    

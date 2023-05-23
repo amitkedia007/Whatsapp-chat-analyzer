@@ -1,5 +1,7 @@
 from urlextract import URLExtract
 from wordcloud import WordCloud
+import nltk
+from nltk.sentiment import SentimentIntensityAnalyzer
 import pandas as pd
 from collections import Counter
 import emoji
@@ -143,4 +145,67 @@ def activity_heatmap(selected_user, df):
 
     return user_heatmap
 
+# Sentiment analysis of each user based on the text and emojis used
 
+nltk.download('vader_lexicon')
+
+def analyze_sentiment(selected_user, df):
+    sia = SentimentIntensityAnalyzer()
+    user_sentiments = {}
+
+    for index, row in df.iterrows():
+        user = row['user']
+        message = row['message']
+
+        if user not in user_sentiments:
+            user_sentiments[user] = {'compound': 0.0, 'pos': 0.0, 'neu': 0.0, 'neg': 0.0}
+        
+        # Analyze text sentiment
+        text_sentiment = sia.polarity_scores(message)
+        for key in user_sentiments[user].keys():
+            user_sentiments[user][key] += text_sentiment[key]
+
+        # Analyze emoji sentiment
+        emojis = [c for c in message if emoji.demojize(c) != c]
+        for emo in emojis:
+            emoji_sentiment = {
+                                '😀': 1.0,  # Positive sentiment
+                                '😢': -1.0,  # Negative sentiment
+                                '😠': -1.0,  # Negative sentiment
+                                '😍': 1.0,  # Positive sentiment
+                                '😐': 0.0,  # Neutral sentiment
+                            }
+            if emo in emoji_sentiment:
+                user_sentiments[user]['compound'] += emoji_sentiment[emo]
+
+    # Average the sentiment scores
+    for user, sentiment_scores in user_sentiments.items():
+        total_messages = df[df['user'] == user].shape[0]
+        for key in sentiment_scores.keys():
+            sentiment_scores[key] /= total_messages
+
+    if selected_user == 'Overall':
+        return user_sentiments
+    else:
+        return {selected_user: user_sentiments.get(selected_user, {'compound': 0.0, 'pos': 0.0, 'neu': 0.0, 'neg': 0.0})}
+
+
+def sentiment_score(user_sentiments, selected_user):
+    if selected_user == 'Overall':
+        pos = sum([user['pos'] for user in user_sentiments.values()])/len(user_sentiments)
+        neg = sum([user['neg'] for user in user_sentiments.values()])/len(user_sentiments)
+        neu = sum([user['neu'] for user in user_sentiments.values()])/len(user_sentiments)
+    elif selected_user in user_sentiments:
+        sentiment_scores = user_sentiments[selected_user]
+        pos = sentiment_scores['pos']
+        neg = sentiment_scores['neg']
+        neu = sentiment_scores['neu']
+    else:
+        return "No sentiment analysis results for the selected user"
+
+    if (pos > neg) and (pos > neu):
+        return "Positive 😊"
+    elif (neg > pos) and (neg > neu):
+        return "Negative 😠"
+    else:
+        return "Neutral 🙂"
