@@ -56,7 +56,9 @@ streamlit run app.py
 2. Open your web browser and go to `http://localhost:8501`.
 
 3. Upload a chat log file using the file uploader in the sidebar.
+
 ![image](https://github.com/amitkedia007/Whatsapp-chat-analyzer/assets/83700281/0aa826e8-e54d-453d-aa23-aad7ca74701a)
+
 
 4. Select a user from the dropdown menu in the sidebar.
 
