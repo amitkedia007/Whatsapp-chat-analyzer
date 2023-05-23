@@ -2,6 +2,9 @@ stremlit
 pandas
 urlextract
 matplotlib
+numpy
+wordcloud
 emoji
 seaborn
 nltk
+collections
